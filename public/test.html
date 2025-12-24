@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BARU API 테스트 페이지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .test-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .test-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-btn:active {
+            transform: translateY(0);
+        }
+
+        .test-btn.get { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .test-btn.post { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .test-btn.put { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .test-btn.delete { background: linear-gradient(135deg, #ff6a88 0%, #ff8c94 100%); }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .custom-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .custom-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .response-container {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .response-text {
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-success { background: #43e97b; }
+        .status-error { background: #ff6a88; }
+        .status-pending { background: #fee140; }
+
+        .endpoint-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .endpoint-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .endpoint-item:last-child {
+            border-bottom: none;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+            margin-right: 10px;
+        }
+
+        .method.get { background: #4facfe; color: white; }
+        .method.post { background: #43e97b; color: white; }
+        .method.put { background: #fee140; color: #333; }
+        .method.delete { background: #ff6a88; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 BARU API 테스트 페이지</h1>
+            <p>백엔드 API를 테스트하고 확인할 수 있는 페이지입니다.</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">빠른 테스트</div>
+            <div class="test-buttons">
+                <button class="test-btn get" onclick="testApi('GET', '/api/users')">
+                    GET /api/users
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/users/1')">
+                    GET /api/users/1
+                </button>
+                <button class="test-btn post" onclick="testApi('POST', '/api/users', {name: '테스트 사용자', email: 'test@example.com'})">
+                    POST /api/users
+                </button>
+                <button class="test-btn put" onclick="testApi('PUT', '/api/users/1', {name: '수정된 사용자'})">
+                    PUT /api/users/1
+                </button>
+                <button class="test-btn delete" onclick="testApi('DELETE', '/api/users/1')">
+                    DELETE /api/users/1
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/trips')">
+                    GET /api/trips
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/recommendations')">
+                    GET /api/recommendations
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/health')">
+                    GET /api/health
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/hotels?cityCode=OSA')">
+                    GET /api/hotels?cityCode=OSA
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/hotels/compare?cityCode=OSA')">
+                    GET /api/hotels/compare
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/flights/destinations?origin=PAR&maxPrice=200')">
+                    GET /api/flights/destinations
+                </button>
+                <button class="test-btn get" onclick="testApi('GET', '/api/flights/offers?originLocationCode=ICN&destinationLocationCode=NRT&departureDate=2025-02-15&adults=1&max=5')">
+                    GET /api/flights/offers
+                </button>
+            </div>
+        </div>
+
+        <div class="section" style="background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%); border: 2px solid #667eea;">
+            <div class="section-title">🏨 Amadeus 호텔 API 테스트</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>도시 코드 (IATA):</label>
+                    <input type="text" id="cityCode" value="OSA" placeholder="OSA, NRT, ICN 등">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        💡 IATA 도시 코드 입력 (예: OSA=오사카, NRT=나리타, ICN=인천)
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>성인 수:</label>
+                    <input type="number" id="adults" value="2" min="1" max="9">
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>체크인 날짜:</label>
+                    <input type="date" id="checkInDate" value="">
+                </div>
+                <div class="form-group">
+                    <label>체크아웃 날짜:</label>
+                    <input type="date" id="checkOutDate" value="">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <button class="custom-btn" onclick="searchHotels()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    🔍 호텔 검색
+                </button>
+                <button class="custom-btn" onclick="compareHotels()" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    💰 가격 비교
+                </button>
+                <button class="custom-btn" onclick="getHotelDetails()" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    📋 상세 정보
+                </button>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>호텔 ID (상세 정보 조회용):</label>
+                <input type="text" id="hotelId" placeholder="호텔 검색 후 hotelId 입력">
+            </div>
+
+            <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 8px; font-size: 13px; color: #856404;">
+                ⚠️ Amadeus API 키가 필요합니다. .env 파일에 AMADEUS_API_KEY와 AMADEUS_API_SECRET을 설정해주세요.
+            </div>
+        </div>
+
+        <div class="section" style="background: linear-gradient(135deg, #4facfe15 0%, #00f2fe15 100%); border: 2px solid #4facfe;">
+            <div class="section-title">✈️ Amadeus 항공편 목적지 검색 (Flight Inspiration Search)</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>출발지 코드 (IATA):</label>
+                    <input type="text" id="flightOrigin" value="PAR" placeholder="PAR, NRT, ICN 등">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        💡 IATA 공항 코드 입력 (예: PAR=파리, NRT=나리타, ICN=인천)
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>최대 가격 (EUR):</label>
+                    <input type="number" id="maxPrice" value="200" min="1" placeholder="200">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        💡 최대 예산 입력 (유로 단위)
+                    </small>
+                </div>
+            </div>
+
+            <button class="custom-btn" onclick="searchFlightDestinations()" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                ✈️ 항공편 목적지 검색하기
+            </button>
+
+            <div style="margin-top: 15px; padding: 10px; background: #d1ecf1; border-radius: 8px; font-size: 13px; color: #0c5460;">
+                💡 Flight Inspiration Search API: 주어진 출발지에서 출발하는 목적지 목록과 각 목적지의 최저 가격을 반환합니다.<br>
+                ⚠️ 참고: 이 API는 제한된 출발지-도착지 쌍만 지원합니다. 에러가 발생하면 다른 출발지 코드를 시도하거나 maxPrice를 비워보세요.
+            </div>
+        </div>
+
+        <div class="section" style="background: linear-gradient(135deg, #fa709a15 0%, #fee14015 100%); border: 2px solid #fa709a;">
+            <div class="section-title">🎫 Amadeus 항공권 가격 검색 (Flight Offers Search)</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>출발지 코드 (IATA) *:</label>
+                    <input type="text" id="flightOriginCode" value="ICN" placeholder="ICN, NRT, PAR 등">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        💡 IATA 공항 코드 (예: ICN=인천, GMP=김포, NRT=나리타, BKK=방콕, LAX=LA)
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>도착지 코드 (IATA) *:</label>
+                    <input type="text" id="flightDestCode" value="NRT" placeholder="NRT, ICN, PAR 등">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        💡 IATA 공항 코드 입력
+                    </small>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>출발 날짜 *:</label>
+                    <input type="date" id="flightDepartureDate" value="">
+                </div>
+                <div class="form-group">
+                    <label>귀국 날짜 (왕복):</label>
+                    <input type="date" id="flightReturnDate" value="" placeholder="선택사항">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        💡 왕복 항공권인 경우 입력
+                    </small>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>성인 수 *:</label>
+                    <input type="number" id="flightAdults" value="1" min="1" max="9">
+                </div>
+                <div class="form-group">
+                    <label>어린이 수:</label>
+                    <input type="number" id="flightChildren" value="0" min="0" max="9">
+                </div>
+                <div class="form-group">
+                    <label>유아 수:</label>
+                    <input type="number" id="flightInfants" value="0" min="0" max="9">
+                </div>
+                <div class="form-group">
+                    <label>최대 결과 수:</label>
+                    <input type="number" id="flightMax" value="10" min="1" max="250">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>좌석 등급:</label>
+                    <select id="flightTravelClass">
+                        <option value="">전체</option>
+                        <option value="ECONOMY">이코노미 (ECONOMY)</option>
+                        <option value="PREMIUM_ECONOMY">프리미엄 이코노미</option>
+                        <option value="BUSINESS">비즈니스</option>
+                        <option value="FIRST">퍼스트</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>통화:</label>
+                    <select id="flightCurrencyCode">
+                        <option value="">기본값</option>
+                        <option value="KRW" selected>KRW (원)</option>
+                        <option value="USD">USD (달러)</option>
+                        <option value="JPY">JPY (엔)</option>
+                        <option value="EUR">EUR (유로)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>최대 가격:</label>
+                    <input type="number" id="flightMaxPrice" value="" placeholder="250000" min="1">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                        💡 통화 단위로 입력 (예: KRW 250000 = 25만원)
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>직항만 검색:</label>
+                    <select id="flightNonStop">
+                        <option value="">전체</option>
+                        <option value="true">직항만</option>
+                        <option value="false">경유 포함</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="custom-btn" onclick="searchFlightOffers()" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                🎫 항공권 가격 검색하기
+            </button>
+
+            <div style="margin-top: 15px; padding: 10px; background: #f8d7da; border-radius: 8px; font-size: 13px; color: #721c24;">
+                💡 Flight Offers Search API: 실제 항공권 검색 및 가격 비교용 API입니다.<br>
+                * 필수 파라미터: 출발지, 도착지, 출발 날짜, 성인 수<br>
+                💰 최대 가격 설정: 통화 단위로 입력 (예: KRW 250000 = 25만원, USD 500 = 500달러)
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">커스텀 요청</div>
+            <div class="form-group">
+                <label>HTTP 메서드:</label>
+                <select id="method">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="PATCH">PATCH</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>엔드포인트:</label>
+                <input type="text" id="endpoint" value="/api/users" placeholder="/api/users">
+            </div>
+            <button class="custom-btn" onclick="sendCustomRequest()">요청 보내기</button>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                응답 결과
+                <span id="statusIndicator" class="status-indicator status-pending"></span>
+                <span id="statusText" style="font-size: 14px; color: #666; font-weight: normal;">대기 중...</span>
+            </div>
+            <div class="response-container">
+                <div class="response-text" id="response">응답이 여기에 표시됩니다...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">사용 가능한 API 엔드포인트</div>
+            <div class="endpoint-list">
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/users</code> - 모든 사용자 조회
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/users/:id</code> - 특정 사용자 조회
+                </div>
+                <div class="endpoint-item">
+                    <span class="method post">POST</span>
+                    <code>/api/users</code> - 사용자 생성 (body: {name, email})
+                </div>
+                <div class="endpoint-item">
+                    <span class="method put">PUT</span>
+                    <code>/api/users/:id</code> - 사용자 수정 (body: {name?, email?})
+                </div>
+                <div class="endpoint-item">
+                    <span class="method delete">DELETE</span>
+                    <code>/api/users/:id</code> - 사용자 삭제
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/trips</code> - 모든 여행 조회
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/trips/:id</code> - 특정 여행 조회
+                </div>
+                <div class="endpoint-item">
+                    <span class="method post">POST</span>
+                    <code>/api/trips</code> - 여행 생성 (body: {destination, budget, peopleCount})
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/recommendations</code> - 여행 추천 (query: ?budget=500000&peopleCount=2&region=제주)
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/health</code> - 서버 상태 확인
+                </div>
+                <div class="endpoint-item" style="border-top: 2px solid #667eea; padding-top: 15px; margin-top: 15px;">
+                    <span class="method get">GET</span>
+                    <code>/api/hotels</code> - 호텔 검색 (Amadeus)
+                    <div style="margin-top: 5px; font-size: 11px; color: #666;">
+                        파라미터: cityCode (필수, 예: "OSA"), checkInDate, checkOutDate, adults (선택)
+                    </div>
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/hotels/:hotelId</code> - 호텔 상세 정보 조회 (Amadeus)
+                    <div style="margin-top: 5px; font-size: 11px; color: #666;">
+                        파라미터: hotelId (필수), checkInDate, checkOutDate, adults (선택)
+                    </div>
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/hotels/compare</code> - 호텔 가격 비교 (Amadeus)
+                    <div style="margin-top: 5px; font-size: 11px; color: #666;">
+                        파라미터: cityCode 또는 hotelIds (필수), checkInDate, checkOutDate, adults (선택)
+                    </div>
+                </div>
+                <div class="endpoint-item" style="border-top: 2px solid #4facfe; padding-top: 15px; margin-top: 15px;">
+                    <span class="method get">GET</span>
+                    <code>/api/flights/destinations</code> - 항공편 목적지 검색 (Amadeus Flight Inspiration Search)
+                    <div style="margin-top: 5px; font-size: 11px; color: #666;">
+                        파라미터: origin (필수, 예: "PAR"), maxPrice (선택, 예: 200)
+                    </div>
+                </div>
+                <div class="endpoint-item">
+                    <span class="method get">GET</span>
+                    <code>/api/flights/offers</code> - 항공권 가격 검색 (Amadeus Flight Offers Search)
+                    <div style="margin-top: 5px; font-size: 11px; color: #666;">
+                        필수: originLocationCode, destinationLocationCode, departureDate, adults<br>
+                        선택: returnDate, children, infants, travelClass, currencyCode, maxPrice, max, nonStop
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+
+        function updateStatus(status, text) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            
+            indicator.className = 'status-indicator';
+            if (status === 'success') {
+                indicator.classList.add('status-success');
+                statusText.textContent = '성공';
+            } else if (status === 'error') {
+                indicator.classList.add('status-error');
+                statusText.textContent = '오류';
+            } else {
+                indicator.classList.add('status-pending');
+                statusText.textContent = text || '대기 중...';
+            }
+        }
+
+        function updateResponse(data, isError = false) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = JSON.stringify(data, null, 2);
+            updateStatus(isError ? 'error' : 'success');
+        }
+
+        async function testApi(method, endpoint, body = null) {
+            updateStatus('pending', '요청 중...');
+            document.getElementById('response').textContent = '요청 중...';
+
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+
+                if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const data = await response.json();
+
+                updateResponse({
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: data,
+                }, !response.ok);
+            } catch (error) {
+                updateResponse({
+                    error: error.message,
+                    type: 'NetworkError',
+                }, true);
+            }
+        }
+
+        async function sendCustomRequest() {
+            const method = document.getElementById('method').value;
+            const endpoint = document.getElementById('endpoint').value;
+
+            if (!endpoint) {
+                alert('엔드포인트를 입력해주세요.');
+                return;
+            }
+
+            await testApi(method, endpoint);
+        }
+
+        // Amadeus 호텔 검색 함수
+        async function searchHotels() {
+            const cityCode = document.getElementById('cityCode').value;
+            const checkInDate = document.getElementById('checkInDate').value;
+            const checkOutDate = document.getElementById('checkOutDate').value;
+            const adults = document.getElementById('adults').value;
+
+            if (!cityCode) {
+                alert('도시 코드를 입력해주세요.');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                cityCode: cityCode,
+            });
+
+            if (checkInDate) params.append('checkInDate', checkInDate);
+            if (checkOutDate) params.append('checkOutDate', checkOutDate);
+            if (adults) params.append('adults', adults);
+
+            await testApi('GET', `/api/hotels?${params}`);
+        }
+
+        // Amadeus 호텔 가격 비교 함수
+        async function compareHotels() {
+            const cityCode = document.getElementById('cityCode').value;
+            const checkInDate = document.getElementById('checkInDate').value;
+            const checkOutDate = document.getElementById('checkOutDate').value;
+            const adults = document.getElementById('adults').value;
+
+            if (!cityCode) {
+                alert('도시 코드를 입력해주세요.');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                cityCode: cityCode,
+            });
+
+            if (checkInDate) params.append('checkInDate', checkInDate);
+            if (checkOutDate) params.append('checkOutDate', checkOutDate);
+            if (adults) params.append('adults', adults);
+
+            await testApi('GET', `/api/hotels/compare?${params}`);
+        }
+
+        // Amadeus 호텔 상세 정보 조회 함수
+        async function getHotelDetails() {
+            const hotelId = document.getElementById('hotelId').value;
+            const checkInDate = document.getElementById('checkInDate').value;
+            const checkOutDate = document.getElementById('checkOutDate').value;
+            const adults = document.getElementById('adults').value;
+
+            if (!hotelId) {
+                alert('호텔 ID를 입력해주세요. (호텔 검색 결과에서 hotelId 확인)');
+                return;
+            }
+
+            const params = new URLSearchParams();
+
+            if (checkInDate) params.append('checkInDate', checkInDate);
+            if (checkOutDate) params.append('checkOutDate', checkOutDate);
+            if (adults) params.append('adults', adults);
+
+            await testApi('GET', `/api/hotels/${hotelId}?${params}`);
+        }
+
+        // Amadeus 항공편 목적지 검색 함수
+        async function searchFlightDestinations() {
+            const origin = document.getElementById('flightOrigin').value;
+            const maxPrice = document.getElementById('maxPrice').value;
+
+            if (!origin) {
+                alert('출발지 코드를 입력해주세요.');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                origin: origin.toUpperCase(),
+            });
+
+            // maxPrice는 선택사항이므로 값이 있을 때만 추가
+            if (maxPrice && maxPrice.trim() !== '') {
+                params.append('maxPrice', maxPrice);
+            }
+
+            await testApi('GET', `/api/flights/destinations?${params}`);
+        }
+
+        // Amadeus 항공권 가격 검색 함수 (Flight Offers Search)
+        async function searchFlightOffers() {
+            const originLocationCode = document.getElementById('flightOriginCode').value;
+            const destinationLocationCode = document.getElementById('flightDestCode').value;
+            const departureDate = document.getElementById('flightDepartureDate').value;
+            const returnDate = document.getElementById('flightReturnDate').value;
+            const adults = document.getElementById('flightAdults').value;
+            const children = document.getElementById('flightChildren').value;
+            const infants = document.getElementById('flightInfants').value;
+            const travelClass = document.getElementById('flightTravelClass').value;
+            const currencyCode = document.getElementById('flightCurrencyCode').value;
+            const maxPrice = document.getElementById('flightMaxPrice').value;
+            const max = document.getElementById('flightMax').value;
+            const nonStop = document.getElementById('flightNonStop').value;
+
+            if (!originLocationCode || !destinationLocationCode || !departureDate) {
+                alert('출발지 코드, 도착지 코드, 출발 날짜를 모두 입력해주세요.');
+                return;
+            }
+
+            const params = new URLSearchParams({
+                originLocationCode: originLocationCode.toUpperCase(),
+                destinationLocationCode: destinationLocationCode.toUpperCase(),
+                departureDate: departureDate,
+            });
+
+            // 선택 파라미터 추가
+            if (returnDate) params.append('returnDate', returnDate);
+            if (adults) params.append('adults', adults);
+            if (children && parseInt(children) > 0) params.append('children', children);
+            if (infants && parseInt(infants) > 0) params.append('infants', infants);
+            if (travelClass) params.append('travelClass', travelClass);
+            if (currencyCode) params.append('currencyCode', currencyCode);
+            if (maxPrice && parseInt(maxPrice) > 0) params.append('maxPrice', maxPrice);
+            if (max) params.append('max', max);
+            if (nonStop) params.append('nonStop', nonStop);
+
+            await testApi('GET', `/api/flights/offers?${params}`);
+        }
+
+        // 페이지 로드 시 날짜 기본값 설정 및 헬스 체크
+        window.addEventListener('load', () => {
+            // 기본 날짜 설정 (30일 후 ~ 32일 후)
+            const today = new Date();
+            const checkIn = new Date(today);
+            checkIn.setDate(today.getDate() + 30);
+            const checkOut = new Date(today);
+            checkOut.setDate(today.getDate() + 32);
+            
+            document.getElementById('checkInDate').value = checkIn.toISOString().split('T')[0];
+            document.getElementById('checkOutDate').value = checkOut.toISOString().split('T')[0];
+            
+            // 항공권 출발 날짜 설정 (30일 후)
+            const flightDeparture = new Date(today);
+            flightDeparture.setDate(today.getDate() + 30);
+            document.getElementById('flightDepartureDate').value = flightDeparture.toISOString().split('T')[0];
+            
+            // 항공권 귀국 날짜 설정 (32일 후, 왕복용)
+            const flightReturn = new Date(today);
+            flightReturn.setDate(today.getDate() + 32);
+            document.getElementById('flightReturnDate').value = flightReturn.toISOString().split('T')[0];
+            
+            testApi('GET', '/api/health');
+        });
+    </script>
+</body>
+</html>
+
